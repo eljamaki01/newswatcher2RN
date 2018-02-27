@@ -7,8 +7,10 @@ import {
   TouchableHighlight,
   TouchableNativeFeedback,
   View,
-  ScrollView
+  ScrollView,
+  Picker
 } from 'react-native';
+import { WebBrowser } from 'expo';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux'
 import { fetchMyNews } from '../utils/utils';
@@ -19,6 +21,7 @@ class MyNewsScreen extends React.Component {
     super(props);
 
     this.state = {
+      selectedValue: '',
       selectedIdx: 0
     };
   }
@@ -35,10 +38,6 @@ class MyNewsScreen extends React.Component {
     fetchMyNews(this.props.dispatch, this.props.session.userId, this.props.session.token);
   }
 
-  // handleChangeFilter = (event) => {
-  //   this.setState({ selectedIdx: parseInt(event.target.value, 10) });
-  // }
-
   onStoryPress = (story) => {
     WebBrowser.openBrowserAsync(story.link);
   };
@@ -46,6 +45,10 @@ class MyNewsScreen extends React.Component {
   onNYTPress = () => {
     WebBrowser.openBrowserAsync('https://developer.nytimes.com');
   };
+
+  // handleChangeFilter = (event) => {
+  //   this.setState({ selectedIdx: parseInt(event.target.value, 10) });
+  // }
 
   render() {
     if (!this.props.session) {
@@ -57,7 +60,7 @@ class MyNewsScreen extends React.Component {
       );
     }
 
-    if (this.state.isLoading || !this.props.newsFilters || this.props.newsFilters.length==0) {
+    if (this.state.isLoading || !this.props.newsFilters || this.props.newsFilters.length == 0) {
       console.log("render loading or something");
       return (
         <View>
@@ -74,6 +77,8 @@ class MyNewsScreen extends React.Component {
     // For the Image try resizeMode="contain" and "cover"
 
     console.log("HERE99");
+    console.log(this.state.selectedIdx);
+    console.log(this.state.selectedValue);
     // console.log(this.props);
     // console.log(this.props.newsFilters);
     // console.log(this.props.newsFilters.length);
@@ -83,6 +88,13 @@ class MyNewsScreen extends React.Component {
 
     return (
       <View>
+        <Picker
+          selectedValue={this.state.selectedValue}
+          onValueChange={(itemValue, itemIndex) => this.setState({ selectedValue: itemValue, selectedIdx: itemIndex })}>
+          {this.props.newsFilters.map((filter, idx) =>
+            <Picker.Item label={filter.name} value={idx} />
+          )}
+        </Picker>
         <ScrollView>
           {this.props.newsFilters[this.state.selectedIdx].newsStories.map((newsStory, idx) =>
             <TouchableElement key={idx} onPress={() => this.onStoryPress(newsStory)}>
