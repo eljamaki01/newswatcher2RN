@@ -7,44 +7,37 @@ import {
   TouchableHighlight,
   TouchableNativeFeedback,
   View,
-  ScrollView,
-  Alert
+  ScrollView
 } from 'react-native';
-import { WebBrowser } from 'expo';
-import { toHours } from '../utils/utils';
-// import { Ionicons } from '@expo/vector-icons';
-// import Touchable from 'react-native-platform-touchable';
+import PropTypes from 'prop-types';
+import { connect } from 'react-redux'
+import { fetchMyNews } from '../utils/utils';
 
-export default class HomeScreen extends React.Component {
+class MyNewsScreen extends React.Component {
   constructor(props) {
+    console.log("HERE");
     super(props);
-    this.state = { isLoading: true, news: null };
+
+    this.state = {
+      selectedIdx: 0
+    };
   }
 
   componentDidMount() {
-    return fetch('https://www.newswatcher2rweb.com/api/homenews', {
-      method: 'GET',
-      cache: 'default'
-    })
-      .then(r => r.json().then(json => ({ ok: r.ok, status: r.status, json })))
-      .then(response => {
-        if (!response.ok || response.status !== 200) {
-          throw new Error(response.json.message);
-        }
-        for (var i = 0; i < response.json.length; i++) {
-          response.json[i].hours = toHours(response.json[i].date);
-        }
-        this.setState({
-          isLoading: false,
-          news: response.json
-        });
-        // this.props.dispatch({ type: 'MSG_DISPLAY', msg: "Home Page news fetched" });
-      })
-      .catch(error => {
-        this.props.dispatch({ type: 'MSG_DISPLAY', msg: `Home News fetch failed: ${error.message}` });
-        Alert.alert(`Home News fetch failed: ${error.message}`);
-      });
+    console.log("componentDidMount:MyNewsScreen");
+    if (!this.props.session) {
+      // return window.location.hash = "";
+      console.log("HERE1");
+      return;
+    }
+
+    // It may be that we startup in a logged in state and then we get here this one time and get the news
+    fetchMyNews(this.props.dispatch, this.props.session.userId, this.props.session.token);
   }
+
+  // handleChangeFilter = (event) => {
+  //   this.setState({ selectedIdx: parseInt(event.target.value, 10) });
+  // }
 
   onStoryPress = (story) => {
     WebBrowser.openBrowserAsync(story.link);
@@ -55,7 +48,17 @@ export default class HomeScreen extends React.Component {
   };
 
   render() {
-    if (this.state.isLoading) {
+    if (!this.props.session) {
+      console.log("render no session");
+      return (
+        <View>
+          <Text>Not currently logged in</Text>
+        </View>
+      );
+    }
+
+    if (this.state.isLoading || !this.props.newsFilters || this.props.newsFilters.length==0) {
+      console.log("render loading or something");
       return (
         <View>
           <Text>Loading home page news...</Text>
@@ -70,10 +73,18 @@ export default class HomeScreen extends React.Component {
     }
     // For the Image try resizeMode="contain" and "cover"
 
+    console.log("HERE99");
+    // console.log(this.props);
+    // console.log(this.props.newsFilters);
+    // console.log(this.props.newsFilters.length);
+    // console.log(this.state.selectedIdx);
+    // console.log(this.props.newsFilters[this.state.selectedIdx].newsStories);
+    // console.log(this.props.newsFilters[this.state.selectedIdx].newsStories.length);
+
     return (
       <View>
         <ScrollView>
-          {this.state.news.map((newsStory, idx) =>
+          {this.props.newsFilters[this.state.selectedIdx].newsStories.map((newsStory, idx) =>
             <TouchableElement key={idx} onPress={() => this.onStoryPress(newsStory)}>
               <View style={styles.row}>
                 <View style={styles.imageContainer}>
@@ -93,7 +104,7 @@ export default class HomeScreen extends React.Component {
               </View>
             </TouchableElement>
           )}
-          <TouchableElement key={this.state.news.length} onPress={() => this.onNYTPress()}>
+          <TouchableElement key={this.props.newsFilters[this.state.selectedIdx].newsStories.length} onPress={() => this.onNYTPress()}>
             <View style={styles.row}>
               <Image source={require('../assets/images/poweredby_nytimes_30b.png')} />
               <View style={styles.textContainer}>
@@ -147,3 +158,18 @@ const styles = StyleSheet.create({
     color: 'gray',
   },
 });
+
+MyNewsScreen.propTypes = {
+  dispatch: PropTypes.func.isRequired
+};
+
+const mapStateToProps = state => {
+  console.log("MyNewsScreen::mapStateToProps called");
+  return {
+    session: state.app.session,
+    newsFilters: state.news.newsFilters,
+    isLoading: state.news.isLoading
+  }
+}
+
+export default connect(mapStateToProps)(MyNewsScreen)

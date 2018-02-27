@@ -6,6 +6,7 @@ import { TabNavigator, TabBarBottom } from 'react-navigation';
 import Colors from '../constants/Colors';
 
 import HomeScreen from '../screens/HomeScreen';
+import MyNewsScreen from '../screens/MyNewsScreen';
 import LinksScreen from '../screens/LinksScreen';
 import SettingsScreen from '../screens/SettingsScreen';
 import LoginScreen from '../screens/LoginScreen';
@@ -14,6 +15,9 @@ export default TabNavigator(
   {
     Home: {
       screen: HomeScreen,
+    },
+    MyNews: {
+      screen: MyNewsScreen,
     },
     Links: {
       screen: LinksScreen,
@@ -32,6 +36,12 @@ export default TabNavigator(
         let iconName;
         switch (routeName) {
           case 'Home':
+            iconName =
+              Platform.OS === 'ios'
+                ? `ios-information-circle${focused ? '' : '-outline'}`
+                : 'md-information-circle';
+            break;
+          case 'MyNews':
             iconName =
               Platform.OS === 'ios'
                 ? `ios-information-circle${focused ? '' : '-outline'}`

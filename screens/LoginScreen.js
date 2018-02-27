@@ -12,6 +12,7 @@ import {
 import { ExpoLinksView } from '@expo/samples';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux'
+import { fetchMyNews } from '../utils/utils';
 
 export class LoginScreen extends React.Component {
   constructor(props) {
@@ -58,6 +59,8 @@ export class LoginScreen extends React.Component {
         dispatch({ type: 'RECEIVE_TOKEN_SUCCESS', msg: `Signed in as ${response.json.displayName}`, session: response.json });
         Alert.alert(`Signed in as ${response.json.displayName}`);
         // window.location.hash = "#news";
+        // We were logged out, and now are logged back in so we need to get the news again for the other tab
+        fetchMyNews(this.props.dispatch, response.json.userId, response.json.token);
       })
       .catch(error => {
         dispatch({ type: 'MSG_DISPLAY', msg: `Sign in failed: ${error.message}` });
