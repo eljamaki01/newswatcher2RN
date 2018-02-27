@@ -1,5 +1,14 @@
 import React from 'react';
-import { StyleSheet, View, TextInput, TouchableOpacity, Text, KeyboardAvoidingView, Alert } from 'react-native';
+import {
+  StyleSheet,
+  View,
+  TextInput,
+  TouchableOpacity,
+  Text,
+  KeyboardAvoidingView,
+  Alert,
+  AsyncStorage
+} from 'react-native';
 import { ExpoLinksView } from '@expo/samples';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux'
@@ -39,17 +48,13 @@ export class LoginScreen extends React.Component {
         if (!response.ok || response.status !== 201) {
           throw new Error(response.json.message);
         }
-        // Set the token in client side storage if the user desires
-        if (this.state.remeberMe) {
-          var xfer = {
-            token: response.json.token,
-            displayName: response.json.displayName,
-            userId: response.json.userId
-          };
-          // window.localStorage.setItem("userToken", JSON.stringify(xfer));
-        } else {
-          // window.localStorage.removeItem("userToken");
-        }
+        // Set the token in device storage
+        var xfer = {
+          token: response.json.token,
+          displayName: response.json.displayName,
+          userId: response.json.userId
+        };
+        AsyncStorage.setItem("userToken", JSON.stringify(xfer));
         dispatch({ type: 'RECEIVE_TOKEN_SUCCESS', msg: `Signed in as ${response.json.displayName}`, session: response.json });
         Alert.alert(`Signed in as ${response.json.displayName}`);
         // window.location.hash = "#news";
@@ -60,7 +65,43 @@ export class LoginScreen extends React.Component {
       });
   }
 
+  handleLogout = () => {
+    const { dispatch } = this.props
+    fetch(`https://www.newswatcher2rweb.com/api/sessions/${this.props.session.userId}`, {
+      method: 'DELETE',
+      headers: new Headers({
+        'x-auth': this.props.session.token
+      }),
+      cache: 'default' // no-store or no-cache?
+    })
+      .then(r => r.json().then(json => ({ ok: r.ok, status: r.status, json })))
+      .then(response => {
+        if (!response.ok || response.status !== 200) {
+          throw new Error(response.json.message);
+        }
+        dispatch({ type: 'DELETE_TOKEN_SUCCESS', msg: "Signed out" });
+        AsyncStorage.removeItem("userToken");
+        // window.location.hash = "";
+        Alert.alert("Signed out");
+      })
+      .catch(error => {
+        dispatch({ type: 'MSG_DISPLAY', msg: `Sign out failed: ${error.message}` });
+        Alert.alert(`Sign out failed: ${error.message}`);
+      });
+  }
+
   render() {
+    // If already logged in, then we offer a logout button
+    if (this.props.session) {
+      return (
+        <View style={styles.formContainer}>
+          <TouchableOpacity style={styles.buttonContainer} onPress={() => this.handleLogout()}>
+            <Text style={styles.buttonText}>Logout</Text>
+          </TouchableOpacity>
+        </View>
+      );
+    }
+
     return (
       <KeyboardAvoidingView behavior="padding" style={styles.container}>
         <View style={styles.formContainer}>
