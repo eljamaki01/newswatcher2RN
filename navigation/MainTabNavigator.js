@@ -8,6 +8,7 @@ import Colors from '../constants/Colors';
 import HomeScreen from '../screens/HomeScreen';
 import LinksScreen from '../screens/LinksScreen';
 import SettingsScreen from '../screens/SettingsScreen';
+import LoginScreen from '../screens/LoginScreen';
 
 export default TabNavigator(
   {
@@ -19,6 +20,9 @@ export default TabNavigator(
     },
     Settings: {
       screen: SettingsScreen,
+    },
+    Login: {
+      screen: LoginScreen,
     },
   },
   {
@@ -37,6 +41,9 @@ export default TabNavigator(
             iconName = Platform.OS === 'ios' ? `ios-link${focused ? '' : '-outline'}` : 'md-link';
             break;
           case 'Settings':
+            iconName =
+              Platform.OS === 'ios' ? `ios-options${focused ? '' : '-outline'}` : 'md-options';
+          case 'Login':
             iconName =
               Platform.OS === 'ios' ? `ios-options${focused ? '' : '-outline'}` : 'md-options';
         }

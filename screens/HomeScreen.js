@@ -7,7 +7,8 @@ import {
   TouchableHighlight,
   TouchableNativeFeedback,
   View,
-  ScrollView
+  ScrollView,
+  Alert
 } from 'react-native';
 import { WebBrowser } from 'expo';
 import { Ionicons } from '@expo/vector-icons';
@@ -31,27 +32,27 @@ export default class HomeScreen extends React.Component {
   }
 
   componentDidMount() {
-    fetch('https://www.newswatcher2rweb.com/api/homenews')
+    return fetch('https://www.newswatcher2rweb.com/api/homenews', {
+      method: 'GET',
+      cache: 'default'
+    })
+      .then(r => r.json().then(json => ({ ok: r.ok, status: r.status, json })))
       .then(response => {
         if (!response.ok || response.status !== 200) {
-          throw new Error('Network response was not ok.');
+          throw new Error(response.json.message);
         }
-        return response.json();
-      })
-      .then(json => {
-        for (var i = 0; i < json.length; i++) {
-          json[i].hours = toHours(json[i].date);
+        for (var i = 0; i < response.json.length; i++) {
+          response.json[i].hours = toHours(response.json[i].date);
         }
-        this.setState(currState => ({
+        this.setState({
           isLoading: false,
-          news: json
-        }));
+          news: response.json
+        });
+        // this.props.dispatch({ type: 'MSG_DISPLAY', msg: "Home Page news fetched" });
       })
       .catch(error => {
-        this.setState(currState => ({
-          isLoading: false,
-          news: null
-        }));
+        this.props.dispatch({ type: 'MSG_DISPLAY', msg: `Home News fetch failed: ${error.message}` });
+        Alert.alert(`Home News fetch failed: ${error.message}`);
       });
   }
 
@@ -60,7 +61,7 @@ export default class HomeScreen extends React.Component {
   };
 
   onNYTPress = () => {
-    WebBrowser.openBrowserAsync('http://developer.nytimes.com');
+    WebBrowser.openBrowserAsync('https://developer.nytimes.com');
   };
 
   render() {
@@ -83,7 +84,7 @@ export default class HomeScreen extends React.Component {
       <View>
         <ScrollView>
           {this.state.news.map((newsStory, idx) =>
-            <TouchableElement onPress={() => this.onStoryPress(newsStory)}>
+            <TouchableElement key={idx} onPress={() => this.onStoryPress(newsStory)}>
               <View style={styles.row}>
                 <View style={styles.imageContainer}>
                   <Image source={{ uri: newsStory.imageUrl }} style={styles.storyImage} />
@@ -102,7 +103,7 @@ export default class HomeScreen extends React.Component {
               </View>
             </TouchableElement>
           )}
-          <TouchableElement onPress={() => this.onNYTPress()}>
+          <TouchableElement key={this.state.news.length} onPress={() => this.onNYTPress()}>
             <View style={styles.row}>
               <Image source={require('../assets/images/poweredby_nytimes_30b.png')} />
               <View style={styles.textContainer}>

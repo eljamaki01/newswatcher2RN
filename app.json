@@ -1,8 +1,8 @@
 {
   "expo": {
-    "name": "newswatcher2rn",
-    "description": "No description",
-    "slug": "newswatcher2rn",
+    "name": "NewsWatcher",
+    "description": "News serving application",
+    "slug": "NewsWatcher",
     "privacy": "public",
     "sdkVersion": "23.0.0",
     "version": "1.0.0",
@@ -16,6 +16,10 @@
     },
     "ios": {
       "supportsTablet": true
-    }
+    },
+    "android": {
+      "package": "com.blueskyproductions.NewsWatcher",
+      "permissions": ["WAKE_LOCK"]
+    } 
   }
 }
