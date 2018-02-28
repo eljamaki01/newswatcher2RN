@@ -7,11 +7,11 @@ import {
   Text,
   KeyboardAvoidingView,
   Alert,
-  AsyncStorage
+  AsyncStorage,
+  Modal
 } from 'react-native';
-import { ExpoLinksView } from '@expo/samples';
 import PropTypes from 'prop-types';
-import { connect } from 'react-redux'
+import { connect } from 'react-redux';
 import { fetchMyNews } from '../utils/utils';
 
 export class LoginScreen extends React.Component {
@@ -22,7 +22,6 @@ export class LoginScreen extends React.Component {
       name: "",
       email: "",
       password: "",
-      remeberMe: false,
       showModal: false
     };
   }
@@ -93,6 +92,82 @@ export class LoginScreen extends React.Component {
       });
   }
 
+  handleRegister() {
+    return fetch('https://www.newswatcher2rweb.com/api/users', {
+      method: 'POST',
+      headers: new Headers({
+        'Content-Type': 'application/json'
+      }),
+      cache: 'default', // no-store or no-cache ro default?
+      body: JSON.stringify({
+        displayName: this.state.name,
+        email: this.state.email,
+        password: this.state.password
+      })
+    })
+      .then(r => r.json().then(json => ({ ok: r.ok, status: r.status, json: json })))
+      .then(response => {
+        if (!response.ok || response.status !== 201) {
+          throw new Error(response.json.message);
+        }
+        this.props.dispatch({ type: 'MSG_DISPLAY', msg: "Registered" });
+        this.setState({ showModal: false });
+      })
+      .catch(error => {
+        this.props.dispatch({ type: 'MSG_DISPLAY', msg: `Registration failure: ${error.message}` });
+        Alert.alert(`Registration failure: ${error.message}`);
+      });
+  }
+  //TODO: Can create a render function that conditionally renders the user name area and follow DRY principle
+  // and show good programming practices.
+  _renderRegisterModal = () => {
+    return (
+      <Modal
+        visible={this.state.showModal}
+        animationType={'slide'}
+        onRequestClose={() => this.setState({ showModal: false })}
+      >
+        <View style={styles.modalContainer}>
+          <View style={styles.formContainer}>
+            <TextInput
+              placeHolder="Enter user name"
+              placeHolderTextColor='rgba(255,255,255,0.7)'
+              returnKeyType="next"
+              onSubmitEditing={() => this.emailInput.focus()}
+              autoCapitalize='none'
+              autoCorrect={false}
+              style={styles.input}
+              onChangeText={(text) => this.setState({ name: text })}
+            />
+            <TextInput
+              placeHolder="Enter email"
+              placeHolderTextColor='rgba(255,255,255,0.7)'
+              returnKeyType="next"
+              onSubmitEditing={() => this.passwordInput.focus()}
+              keyboardType='email-address'
+              autoCapitalize='none'
+              autoCorrect={false}
+              style={styles.input}
+              ref={(input) => this.emailInput = input}
+              onChangeText={(text) => this.setState({ email: text })}
+            />
+            <TextInput
+              placeHolder="Enter password"
+              placeHolderTextColor='rgba(255,255,255,0.7)'
+              secureTextEntry
+              style={styles.input}
+              ref={(input) => this.passwordInput = input}
+              onChangeText={(text) => this.setState({ password: text })}
+            />
+            <TouchableOpacity style={styles.buttonContainer} onPress={() => this.handleRegister()}>
+              <Text style={styles.buttonText}>Register</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
+    );
+  }
+
   render() {
     // If already logged in, then we offer a logout button
     if (this.props.session) {
@@ -130,7 +205,12 @@ export class LoginScreen extends React.Component {
           <TouchableOpacity style={styles.buttonContainer} onPress={() => this.handleLogin()}>
             <Text style={styles.buttonText}>Login</Text>
           </TouchableOpacity>
+          <Text style={styles.buttonText}>Register if you want to see filtered new feeds</Text>
+          <TouchableOpacity style={styles.buttonContainer} onPress={() => this.setState({ showModal: true })}>
+            <Text style={styles.buttonText}>Sign up</Text>
+          </TouchableOpacity>
         </View>
+        {this._renderRegisterModal()}
       </KeyboardAvoidingView>
     );
   }
@@ -160,6 +240,11 @@ const styles = StyleSheet.create({
     color: '#FFFFFF',
     fontWeight: '700'
   },
+  modalContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    backgroundColor: 'grey',
+  }
 });
 
 LoginScreen.propTypes = {

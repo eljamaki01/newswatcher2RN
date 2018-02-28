@@ -33,11 +33,8 @@ export default class App extends React.Component {
   componentDidMount() {
     // Check for token in device local storage
     AsyncStorage.getItem('userToken', function (err, value) {
-      console.log(err);
-      console.log(value);
       if (value) {
         const tokenObject = JSON.parse(value);
-        console.log(tokenObject);
         store.dispatch({ type: 'RECEIVE_TOKEN_SUCCESS', msg: `Signed in as ${tokenObject.displayName}`, session: tokenObject });
       } else {
       }

@@ -17,7 +17,6 @@ import { fetchMyNews } from '../utils/utils';
 
 class MyNewsScreen extends React.Component {
   constructor(props) {
-    console.log("HERE");
     super(props);
 
     this.state = {
@@ -27,10 +26,8 @@ class MyNewsScreen extends React.Component {
   }
 
   componentDidMount() {
-    console.log("componentDidMount:MyNewsScreen");
     if (!this.props.session) {
       // return window.location.hash = "";
-      console.log("HERE1");
       return;
     }
 
@@ -52,7 +49,6 @@ class MyNewsScreen extends React.Component {
 
   render() {
     if (!this.props.session) {
-      console.log("render no session");
       return (
         <View>
           <Text>Not currently logged in</Text>
@@ -61,7 +57,6 @@ class MyNewsScreen extends React.Component {
     }
 
     if (this.state.isLoading || !this.props.newsFilters || this.props.newsFilters.length == 0) {
-      console.log("render loading or something");
       return (
         <View>
           <Text>Loading home page news...</Text>
@@ -75,16 +70,6 @@ class MyNewsScreen extends React.Component {
       TouchableElement = TouchableNativeFeedback;
     }
     // For the Image try resizeMode="contain" and "cover"
-
-    console.log("HERE99");
-    console.log(this.state.selectedIdx);
-    console.log(this.state.selectedValue);
-    // console.log(this.props);
-    // console.log(this.props.newsFilters);
-    // console.log(this.props.newsFilters.length);
-    // console.log(this.state.selectedIdx);
-    // console.log(this.props.newsFilters[this.state.selectedIdx].newsStories);
-    // console.log(this.props.newsFilters[this.state.selectedIdx].newsStories.length);
 
     return (
       <View>
@@ -176,7 +161,6 @@ MyNewsScreen.propTypes = {
 };
 
 const mapStateToProps = state => {
-  console.log("MyNewsScreen::mapStateToProps called");
   return {
     session: state.app.session,
     newsFilters: state.news.newsFilters,
