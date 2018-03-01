@@ -8,11 +8,14 @@ import {
   KeyboardAvoidingView,
   Alert,
   AsyncStorage,
-  Modal
+  Modal,
+  Switch,
+  Button
 } from 'react-native';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import { fetchMyNews } from '../utils/utils';
+import { fetchMyProfile } from '../utils/utils';
 
 export class LoginScreen extends React.Component {
   constructor(props) {
@@ -22,12 +25,13 @@ export class LoginScreen extends React.Component {
       name: "",
       email: "",
       password: "",
-      showModal: false
+      showRegisterModal: false,
+      showUnRegisterModal: false
     };
   }
 
   static navigationOptions = {
-    title: 'Links',
+    title: 'Login',
   };
 
   handleLogin = () => {
@@ -60,6 +64,7 @@ export class LoginScreen extends React.Component {
         // window.location.hash = "#news";
         // We were logged out, and now are logged back in so we need to get the news again for the other tab
         fetchMyNews(this.props.dispatch, response.json.userId, response.json.token);
+        fetchMyProfile(this.props.dispatch, response.json.userId, response.json.token);
       })
       .catch(error => {
         dispatch({ type: 'MSG_DISPLAY', msg: `Sign in failed: ${error.message}` });
@@ -92,7 +97,7 @@ export class LoginScreen extends React.Component {
       });
   }
 
-  handleRegister() {
+  handleRegister = () => {
     return fetch('https://www.newswatcher2rweb.com/api/users', {
       method: 'POST',
       headers: new Headers({
@@ -111,21 +116,48 @@ export class LoginScreen extends React.Component {
           throw new Error(response.json.message);
         }
         this.props.dispatch({ type: 'MSG_DISPLAY', msg: "Registered" });
-        this.setState({ showModal: false });
+        this.setState({ showRegisterModal: false });
       })
       .catch(error => {
         this.props.dispatch({ type: 'MSG_DISPLAY', msg: `Registration failure: ${error.message}` });
         Alert.alert(`Registration failure: ${error.message}`);
       });
   }
+
+  handleUnRegister = () => {
+    const { dispatch } = this.props
+    fetch(`https://www.newswatcher2rweb.com/api/users/${this.props.session.userId}`, {
+      method: 'DELETE',
+      headers: new Headers({
+        'x-auth': this.props.session.token
+      }),
+      cache: 'default' // no-store or no-cache?
+    })
+      .then(r => r.json().then(json => ({ ok: r.ok, status: r.status, json })))
+      .then(response => {
+        if (!response.ok || response.status !== 200) {
+          throw new Error(response.json.message);
+        }
+        // this.props.appLogoutCB();
+        dispatch({ type: 'DELETE_TOKEN_SUCCESS', msg: "Signed out" });
+        AsyncStorage.removeItem("userToken");
+        this.setState({ showUnRegisterModal: false });
+        Alert.alert("Account deleted");
+      })
+      .catch(error => {
+        dispatch({ type: 'MSG_DISPLAY', msg: `Account delete failed: ${error.message}` });
+        Alert.alert(`Account delete failed: ${error.message}`);
+      });
+  }
+
   //TODO: Can create a render function that conditionally renders the user name area and follow DRY principle
   // and show good programming practices.
   _renderRegisterModal = () => {
     return (
       <Modal
-        visible={this.state.showModal}
+        visible={this.state.showRegisterModal}
         animationType={'slide'}
-        onRequestClose={() => this.setState({ showModal: false })}
+        onRequestClose={() => this.setState({ showRegisterModal: false })}
       >
         <View style={styles.modalContainer}>
           <View style={styles.formContainer}>
@@ -159,9 +191,42 @@ export class LoginScreen extends React.Component {
               ref={(input) => this.passwordInput = input}
               onChangeText={(text) => this.setState({ password: text })}
             />
-            <TouchableOpacity style={styles.buttonContainer} onPress={() => this.handleRegister()}>
+            <TouchableOpacity style={styles.buttonContainer} onPress={this.handleRegister}>
               <Text style={styles.buttonText}>Register</Text>
             </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
+    );
+  }
+
+  _renderUnRegisterModal = () => {
+    return (
+      <Modal
+        visible={this.state.showUnRegisterModal}
+        animationType={'slide'}
+        onRequestClose={() => this.setState({ showUnRegisterModal: false })}
+      >
+        <View style={styles.modalContainer}>
+          <View style={styles.formContainer}>
+            <View style={{ flexDirection: 'row' }}>
+              <Switch
+                value={this.state.deleteOK}
+                onValueChange={(value) => this.setState({ deleteOK: value })}>
+              </Switch>
+              <Text>Are you sure?</Text>
+            </View>
+            <Button
+              disabled={!this.state.deleteOK}
+              onPress={this.handleUnRegister}
+              title="UnRegister"
+              color="#841584"
+            />
+            <Button
+              onPress={() => this.setState({ showUnRegisterModal: false })}
+              title="Cancel"
+              color="#841584"
+            />
           </View>
         </View>
       </Modal>
@@ -176,6 +241,11 @@ export class LoginScreen extends React.Component {
           <TouchableOpacity style={styles.buttonContainer} onPress={() => this.handleLogout()}>
             <Text style={styles.buttonText}>Logout</Text>
           </TouchableOpacity>
+          <Text>No longer have a need for NewsWatcher?</Text>
+          <TouchableOpacity style={styles.buttonContainer} onPress={() => this.setState({ showUnRegisterModal: true })}>
+            <Text style={styles.buttonText}>UnRegister</Text>
+          </TouchableOpacity>
+          {this._renderUnRegisterModal()}
         </View>
       );
     }
@@ -206,7 +276,7 @@ export class LoginScreen extends React.Component {
             <Text style={styles.buttonText}>Login</Text>
           </TouchableOpacity>
           <Text style={styles.buttonText}>Register if you want to see filtered new feeds</Text>
-          <TouchableOpacity style={styles.buttonContainer} onPress={() => this.setState({ showModal: true })}>
+          <TouchableOpacity style={styles.buttonContainer} onPress={() => this.setState({ showRegisterModal: true })}>
             <Text style={styles.buttonText}>Sign up</Text>
           </TouchableOpacity>
         </View>

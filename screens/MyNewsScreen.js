@@ -73,6 +73,7 @@ class MyNewsScreen extends React.Component {
 
     return (
       <View>
+        <Text>News</Text>
         <Picker
           selectedValue={this.state.selectedValue}
           onValueChange={(itemValue, itemIndex) => this.setState({ selectedValue: itemValue, selectedIdx: itemIndex })}>

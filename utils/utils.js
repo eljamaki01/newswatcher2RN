@@ -39,3 +39,29 @@ export function fetchMyNews(dispatch, userId, token) {
       Alert.alert(`News fetch failed: ${error.message}`);
     });
 }
+
+export function fetchMyProfile(dispatch, userId, token) {
+    dispatch({ type: 'REQUEST_PROFILE' });
+    fetch(`https://www.newswatcher2rweb.com/api/users/${userId}`, {
+      method: 'GET',
+      headers: new Headers({
+        'x-auth': token
+      }),
+      cache: 'default'
+    })
+      .then(r => r.json().then(json => ({ ok: r.ok, status: r.status, json })))
+      .then(response => {
+        if (!response.ok || response.status !== 200) {
+          throw new Error(response.json.message);
+        }
+        for (var i = 0; i < response.json.newsFilters.length; i++) {
+          response.json.newsFilters[i].keywordsStr = response.json.newsFilters[i].keyWords.join(',');
+        }
+        dispatch({ type: 'RECEIVE_PROFILE_SUCCESS', user: response.json });
+        dispatch({ type: 'MSG_DISPLAY', msg: "Profile fetched" });
+      })
+      .catch(error => {
+        dispatch({ type: 'MSG_DISPLAY', msg: `Profile fetch failed: ${error.message}` });
+        Alert.alert(`Profile fetch failed: ${error.message}`);
+      });
+}
