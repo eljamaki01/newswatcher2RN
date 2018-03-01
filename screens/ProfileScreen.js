@@ -13,7 +13,9 @@ import {
 } from 'react-native';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
+import { fetchMyNews } from '../utils/utils';
 import { fetchMyProfile } from '../utils/utils';
+import ModalDropdown from 'react-native-modal-dropdown';
 
 class ProfileScreen extends React.Component {
   constructor(props) {
@@ -43,13 +45,13 @@ class ProfileScreen extends React.Component {
     } else {
       var len = this.props.user.newsFilters.length;
       dispatch({ type: 'ADD_FILTER' });
-      this.setState({ selectedIdx: len });
+      this.setState({ selectedValue: len, selectedIdx: len });
     }
   }
 
   handleDelete = () => {
     this.props.dispatch({ type: 'DELETE_FILTER', selectedIdx: this.state.selectedIdx });
-    this.setState({ selectedIdx: 0 });
+    this.setState({ selectedValue: 0, selectedIdx: 0 });
   }
 
   handleSave = () => {
@@ -69,11 +71,19 @@ class ProfileScreen extends React.Component {
           throw new Error(response.json.message);
         }
         dispatch({ type: 'MSG_DISPLAY', msg: "Profile saved" });
+        Alert.alert("Profile save");
+        setTimeout(() => {
+          fetchMyNews(this.props.dispatch, this.props.session.userId, this.props.session.token);
+        }, 2000);
       })
       .catch(error => {
         dispatch({ type: 'MSG_DISPLAY', msg: `Profile save failed: ${error.message}` });
         Alert.alert(`Profile save failed: ${error.message}`);
       });
+  }
+
+  handleOnValueChange = (itemIndex, itemValue) => {
+    this.setState({ selectedValue: itemValue, selectedIdx: itemIndex });
   }
 
   render() {
@@ -93,38 +103,47 @@ class ProfileScreen extends React.Component {
       );
     }
 
+    const optionsArray = this.props.user.newsFilters.map((filter) => filter.name);
+
     return (
       <View>
         <Text>News Filters</Text>
-        <Picker
+        {/* There is a bug in the Picker component of React Native.
+            Any change of text on a slection, sets the picker back to the first selection in the list
+          <Picker
           selectedValue={this.state.selectedValue}
-          onValueChange={(itemValue, itemIndex) => this.setState({ selectedValue: itemValue, selectedIdx: itemIndex })}>
+          onValueChange={this.handleOnValueChange}>
           {this.props.user.newsFilters.map((filter, idx) =>
             <Picker.Item label={filter.name} value={idx} />
           )}
-        </Picker>
+        </Picker> */}
+        <Text>Tap to change filter:</Text>
+        <ModalDropdown
+          textStyle={styles.pickerText}
+          options={optionsArray}
+          defaultIndex={this.state.selectedIdx}
+          defaultValue={this.props.user.newsFilters[this.state.selectedIdx].name}
+          onSelect={this.handleOnValueChange}>
+        </ModalDropdown>
         <KeyboardAvoidingView behavior="padding" style={styles.container}>
           <View style={styles.formContainer}>
             <Text>Name:</Text>
             <TextInput
-              placeHolder="Enter filter name"
-              placeHolderTextColor='rgba(255,255,255,0.7)'
               style={styles.input}
               onChangeText={(text) => this.props.dispatch({ type: 'ALTER_FILTER_NAME', filterIdx: this.state.selectedIdx, value: text })}
               value={this.props.user.newsFilters[this.state.selectedIdx].name}
             />
+            <Text>Keywords:</Text>
             <TextInput
-              placeHolder="Enter keywords"
-              placeHolderTextColor='rgba(255,255,255,0.7)'
               style={styles.input}
               onChangeText={(text) => this.props.dispatch({ type: 'ALTER_FILTER_KEYWORDS', filterIdx: this.state.selectedIdx, value: text })}
               value={this.props.user.newsFilters[this.state.selectedIdx].keywordsStr}
             />
             <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
-              <TouchableOpacity disabled={this.props.user.newsFilters.length>4} style={styles.buttonContainer} onPress={this.handleAdd}>
+              <TouchableOpacity disabled={this.props.user.newsFilters.length > 4} style={styles.buttonContainer} onPress={this.handleAdd}>
                 <Text style={styles.buttonText}>Add</Text>
               </TouchableOpacity>
-              <TouchableOpacity disabled={this.props.user.newsFilters.length<2} style={styles.buttonContainer} onPress={this.handleDelete}>
+              <TouchableOpacity disabled={this.props.user.newsFilters.length < 2} style={styles.buttonContainer} onPress={this.handleDelete}>
                 <Text style={styles.buttonText}>Delete</Text>
               </TouchableOpacity>
               <TouchableOpacity style={styles.buttonContainer} onPress={this.handleSave}>
@@ -145,6 +164,10 @@ const styles = StyleSheet.create({
   },
   formContainer: {
     padding: 20
+  },
+  pickerText: {
+    fontSize: 20,
+    fontWeight: 'bold',
   },
   input: {
     height: 40,
@@ -173,7 +196,6 @@ const styles = StyleSheet.create({
 });
 
 ProfileScreen.propTypes = {
-  appLogoutCB: PropTypes.func.isRequired,
   dispatch: PropTypes.func.isRequired
 };
 
