@@ -31,7 +31,7 @@ export class LoginScreen extends React.Component {
   }
 
   static navigationOptions = {
-    title: 'Login',
+    title: 'Account',
   };
 
   handleLogin = () => {
@@ -61,7 +61,6 @@ export class LoginScreen extends React.Component {
         AsyncStorage.setItem("userToken", JSON.stringify(xfer));
         dispatch({ type: 'RECEIVE_TOKEN_SUCCESS', msg: `Signed in as ${response.json.displayName}`, session: response.json });
         Alert.alert(`Signed in as ${response.json.displayName}`);
-        // window.location.hash = "#news";
         // We were logged out, and now are logged back in so we need to get the news again for the other tab
         fetchMyNews(this.props.dispatch, response.json.userId, response.json.token);
         fetchMyProfile(this.props.dispatch, response.json.userId, response.json.token);
@@ -79,7 +78,7 @@ export class LoginScreen extends React.Component {
       headers: new Headers({
         'x-auth': this.props.session.token
       }),
-      cache: 'default' // no-store or no-cache?
+      cache: 'default'
     })
       .then(r => r.json().then(json => ({ ok: r.ok, status: r.status, json })))
       .then(response => {
@@ -88,7 +87,6 @@ export class LoginScreen extends React.Component {
         }
         dispatch({ type: 'DELETE_TOKEN_SUCCESS', msg: "Signed out" });
         AsyncStorage.removeItem("userToken");
-        // window.location.hash = "";
         Alert.alert("Signed out");
       })
       .catch(error => {
@@ -103,7 +101,7 @@ export class LoginScreen extends React.Component {
       headers: new Headers({
         'Content-Type': 'application/json'
       }),
-      cache: 'default', // no-store or no-cache ro default?
+      cache: 'default',
       body: JSON.stringify({
         displayName: this.state.name,
         email: this.state.email,
@@ -131,14 +129,13 @@ export class LoginScreen extends React.Component {
       headers: new Headers({
         'x-auth': this.props.session.token
       }),
-      cache: 'default' // no-store or no-cache?
+      cache: 'default'
     })
       .then(r => r.json().then(json => ({ ok: r.ok, status: r.status, json })))
       .then(response => {
         if (!response.ok || response.status !== 200) {
           throw new Error(response.json.message);
         }
-        // this.props.appLogoutCB();
         dispatch({ type: 'DELETE_TOKEN_SUCCESS', msg: "Signed out" });
         AsyncStorage.removeItem("userToken");
         this.setState({ showUnRegisterModal: false });
@@ -161,6 +158,7 @@ export class LoginScreen extends React.Component {
       >
         <View style={styles.modalContainer}>
           <View style={styles.formContainer}>
+            <Text>Username:</Text>
             <TextInput
               placeHolder="Enter user name"
               placeHolderTextColor='rgba(255,255,255,0.7)'
@@ -171,6 +169,7 @@ export class LoginScreen extends React.Component {
               style={styles.input}
               onChangeText={(text) => this.setState({ name: text })}
             />
+            <Text>Email:</Text>
             <TextInput
               placeHolder="Enter email"
               placeHolderTextColor='rgba(255,255,255,0.7)'
@@ -183,6 +182,7 @@ export class LoginScreen extends React.Component {
               ref={(input) => this.emailInput = input}
               onChangeText={(text) => this.setState({ email: text })}
             />
+            <Text>Password:</Text>
             <TextInput
               placeHolder="Enter password"
               placeHolderTextColor='rgba(255,255,255,0.7)'
@@ -222,6 +222,7 @@ export class LoginScreen extends React.Component {
               title="UnRegister"
               color="#841584"
             />
+            <Text>Why leave us now?</Text>
             <Button
               onPress={() => this.setState({ showUnRegisterModal: false })}
               title="Cancel"
@@ -253,6 +254,7 @@ export class LoginScreen extends React.Component {
     return (
       <KeyboardAvoidingView behavior="padding" style={styles.container}>
         <View style={styles.formContainer}>
+          <Text>Email:</Text>
           <TextInput
             placeHolder="Enter email"
             placeHolderTextColor='rgba(255,255,255,0.7)'
@@ -264,6 +266,7 @@ export class LoginScreen extends React.Component {
             style={styles.input}
             onChangeText={(text) => this.setState({ email: text })}
           />
+          <Text>Password:</Text>
           <TextInput
             placeHolder="Enter password"
             placeHolderTextColor='rgba(255,255,255,0.7)'

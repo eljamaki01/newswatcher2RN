@@ -14,7 +14,6 @@ const news = (state = initialState, action) => {
     }
     case 'RECEIVE_SHAREDNEWS_SUCCESS':
       return {
-        // ...state,
         isLoading: false,
         news: action.news,
       }

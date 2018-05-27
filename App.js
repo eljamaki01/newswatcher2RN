@@ -31,7 +31,7 @@ export default class App extends React.Component {
   };
 
   componentDidMount() {
-    // Check for token in device local storage
+    // Check for token in device local storage, meaning user is signed in
     AsyncStorage.getItem('userToken', function (err, value) {
       if (value) {
         const tokenObject = JSON.parse(value);
@@ -57,7 +57,6 @@ export default class App extends React.Component {
           <View style={styles.container}>
             {Platform.OS === 'ios' && <StatusBar barStyle="default" />}
             {Platform.OS === 'android' && <View style={styles.statusBarUnderlay} />}
-            {/* <RootNavigation /> */}
             <RootNavigator />
           </View>
         </Provider>

@@ -24,7 +24,7 @@ const news = (state = initialState, action) => {
         user: update(state.user, {
           newsFilters: {
             $push: [{
-              name: 'New Filter',
+              name: action.filterName,
               keyWords: ["Keyword"],
               keywordsStr: "Keyword",
               enableAlert: false,

@@ -12,16 +12,16 @@ import ProfileScreen from '../screens/ProfileScreen';
 
 export default TabNavigator(
   {
-    Home: {
+    HomeNews: {
       screen: HomeScreen,
     },
     MyNews: {
       screen: MyNewsScreen,
     },
-    MyProfile: {
+    NewsFilters: {
       screen: ProfileScreen,
     },
-    Login: {
+    Account: {
       screen: LoginScreen,
     },
   },
@@ -31,25 +31,25 @@ export default TabNavigator(
         const { routeName } = navigation.state;
         let iconName;
         switch (routeName) {
-          case 'Home':
+          case 'HomeNews':
             iconName =
-              Platform.OS === 'ios'
-                ? `ios-information-circle${focused ? '' : '-outline'}`
-                : 'md-information-circle';
+              Platform.OS === 'ios' ? `ios-home${focused ? '' : '-outline'}`
+                : 'md-home';
             break;
           case 'MyNews':
             iconName =
-              Platform.OS === 'ios'
-                ? `ios-information-circle${focused ? '' : '-outline'}`
-                : 'md-information-circle';
+              Platform.OS === 'ios' ? `ios-funnel${focused ? '' : '-outline'}`
+                : 'md-funnel';
             break;
-          case 'MyProfile':
+          case 'NewsFilters':
             iconName =
-              Platform.OS === 'ios' ? `ios-options${focused ? '' : '-outline'}` : 'md-options';
+              Platform.OS === 'ios' ? `ios-options${focused ? '' : '-outline'}`
+                : 'md-options';
             break;
-          case 'Login':
+          case 'Account':
             iconName =
-              Platform.OS === 'ios' ? `ios-options${focused ? '' : '-outline'}` : 'md-link';
+              Platform.OS === 'ios' ? `ios-person${focused ? '' : '-outline'}`
+                : 'md-person';
         }
         return (
           <Ionicons

@@ -12,14 +12,16 @@ import {
 } from 'react-native';
 import { WebBrowser } from 'expo';
 import { toHours } from '../utils/utils';
-// import { Ionicons } from '@expo/vector-icons';
-// import Touchable from 'react-native-platform-touchable';
 
 export default class HomeScreen extends React.Component {
   constructor(props) {
     super(props);
     this.state = { isLoading: true, news: null };
   }
+
+  static navigationOptions = {
+    title: 'HomeNews',
+  };
 
   componentDidMount() {
     return fetch('https://www.newswatcher2rweb.com/api/homenews', {
@@ -38,7 +40,6 @@ export default class HomeScreen extends React.Component {
           isLoading: false,
           news: response.json
         });
-        // this.props.dispatch({ type: 'MSG_DISPLAY', msg: "Home Page news fetched" });
       })
       .catch(error => {
         this.props.dispatch({ type: 'MSG_DISPLAY', msg: `Home News fetch failed: ${error.message}` });

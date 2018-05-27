@@ -25,13 +25,15 @@ class MyNewsScreen extends React.Component {
     };
   }
 
+  static navigationOptions = {
+    title: 'MyNews',
+  };
+
   componentDidMount() {
     if (!this.props.session) {
-      // return window.location.hash = "";
       return;
     }
 
-    // It may be that we startup in a logged in state and then we get here this one time and get the news
     fetchMyNews(this.props.dispatch, this.props.session.userId, this.props.session.token);
   }
 
@@ -42,10 +44,6 @@ class MyNewsScreen extends React.Component {
   onNYTPress = () => {
     WebBrowser.openBrowserAsync('https://developer.nytimes.com');
   };
-
-  // handleChangeFilter = (event) => {
-  //   this.setState({ selectedIdx: parseInt(event.target.value, 10) });
-  // }
 
   render() {
     if (!this.props.session) {
@@ -78,7 +76,7 @@ class MyNewsScreen extends React.Component {
           selectedValue={this.state.selectedValue}
           onValueChange={(itemValue, itemIndex) => this.setState({ selectedValue: itemValue, selectedIdx: itemIndex })}>
           {this.props.newsFilters.map((filter, idx) =>
-            <Picker.Item label={filter.name} value={idx} />
+            <Picker.Item label={filter.name} key={idx} value={idx} />
           )}
         </Picker>
         <ScrollView>

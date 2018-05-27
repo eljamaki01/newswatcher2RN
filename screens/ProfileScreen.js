@@ -24,17 +24,21 @@ class ProfileScreen extends React.Component {
     this.state = {
       deleteOK: false,
       selectedValue: '',
-      selectedIdx: 0
+      selectedIdx: 0,
+      showFilterNameModal: false,
+      filterName: ""
     };
   }
 
+  static navigationOptions = {
+    title: 'NewsFilters',
+  };
+
   componentDidMount() {
     if (!this.props.session) {
-      // return window.location.hash = "";
       return;
     }
 
-    // We only get here once to this code, and maybe not, if we are not logged in
     fetchMyProfile(this.props.dispatch, this.props.session.userId, this.props.session.token);
   }
 
@@ -42,11 +46,13 @@ class ProfileScreen extends React.Component {
     const { dispatch } = this.props
     if (this.props.user.newsFilters.length === 5) {
       dispatch({ type: 'MSG_DISPLAY', msg: "No more newsFilters allowed" });
+      Alert.alert("No more newsFilters allowed");
     } else {
       var len = this.props.user.newsFilters.length;
-      dispatch({ type: 'ADD_FILTER' });
+      dispatch({ type: 'ADD_FILTER', filterName: this.state.filterName });
       this.setState({ selectedValue: len, selectedIdx: len });
     }
+    this.setState({ showFilterNameModal: false });
   }
 
   handleDelete = () => {
@@ -62,7 +68,7 @@ class ProfileScreen extends React.Component {
         'x-auth': this.props.session.token,
         'Content-Type': 'application/json'
       }),
-      cache: 'default', // no-store or no-cache ro default?
+      cache: 'default',
       body: JSON.stringify(this.props.user)
     })
       .then(r => r.json().then(json => ({ ok: r.ok, status: r.status, json })))
@@ -84,6 +90,36 @@ class ProfileScreen extends React.Component {
 
   handleOnValueChange = (itemIndex, itemValue) => {
     this.setState({ selectedValue: itemValue, selectedIdx: itemIndex });
+  }
+
+  _renderFilterNameModal = () => {
+    return (
+      <Modal
+        visible={this.state.showFilterNameModal}
+        animationType={'slide'}
+        onRequestClose={() => this.setState({ showFilterNameModal: false })}
+      >
+        <View style={styles.modalContainer}>
+          <View style={styles.formContainer}>
+            <Text>Filter Name:</Text>
+            <TextInput
+              placeHolder="Enter filter name"
+              placeHolderTextColor='rgba(255,255,255,0.7)'
+              autoCapitalize='none'
+              autoCorrect={false}
+              style={styles.input}
+              onChangeText={(text) => this.setState({ filterName: text })}
+            />
+            <TouchableOpacity style={styles.buttonContainer} onPress={this.handleAdd}>
+              <Text style={styles.buttonText}>Create Filter</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.buttonContainer} onPress={() => this.setState({ showFilterNameModal: false })}>
+              <Text style={styles.buttonText}>Cancel</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
+    );
   }
 
   render() {
@@ -108,31 +144,15 @@ class ProfileScreen extends React.Component {
     return (
       <View>
         <Text>News Filters</Text>
-        {/* There is a bug in the Picker component of React Native.
-            Any change of text on a slection, sets the picker back to the first selection in the list
-          <Picker
+        <Picker
           selectedValue={this.state.selectedValue}
           onValueChange={this.handleOnValueChange}>
           {this.props.user.newsFilters.map((filter, idx) =>
-            <Picker.Item label={filter.name} value={idx} />
+            <Picker.Item label={filter.name} key={idx} value={idx} />
           )}
-        </Picker> */}
-        <Text>Tap to change filter:</Text>
-        <ModalDropdown
-          textStyle={styles.pickerText}
-          options={optionsArray}
-          defaultIndex={this.state.selectedIdx}
-          defaultValue={this.props.user.newsFilters[this.state.selectedIdx].name}
-          onSelect={this.handleOnValueChange}>
-        </ModalDropdown>
+        </Picker>
         <KeyboardAvoidingView behavior="padding" style={styles.container}>
           <View style={styles.formContainer}>
-            <Text>Name:</Text>
-            <TextInput
-              style={styles.input}
-              onChangeText={(text) => this.props.dispatch({ type: 'ALTER_FILTER_NAME', filterIdx: this.state.selectedIdx, value: text })}
-              value={this.props.user.newsFilters[this.state.selectedIdx].name}
-            />
             <Text>Keywords:</Text>
             <TextInput
               style={styles.input}
@@ -140,7 +160,7 @@ class ProfileScreen extends React.Component {
               value={this.props.user.newsFilters[this.state.selectedIdx].keywordsStr}
             />
             <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
-              <TouchableOpacity disabled={this.props.user.newsFilters.length > 4} style={styles.buttonContainer} onPress={this.handleAdd}>
+              <TouchableOpacity disabled={this.props.user.newsFilters.length > 4} style={styles.buttonContainer} onPress={() => this.setState({ showFilterNameModal: true })}>
                 <Text style={styles.buttonText}>Add</Text>
               </TouchableOpacity>
               <TouchableOpacity disabled={this.props.user.newsFilters.length < 2} style={styles.buttonContainer} onPress={this.handleDelete}>
@@ -151,6 +171,7 @@ class ProfileScreen extends React.Component {
               </TouchableOpacity>
             </View>
           </View>
+          {this._renderFilterNameModal()}
         </KeyboardAvoidingView>
       </View>
     );
@@ -159,7 +180,6 @@ class ProfileScreen extends React.Component {
 
 const styles = StyleSheet.create({
   container: {
-    // flex: 1,
     backgroundColor: '#3498db'
   },
   formContainer: {
@@ -180,6 +200,8 @@ const styles = StyleSheet.create({
     flexGrow: 1,
     backgroundColor: '#2980b9',
     paddingVertical: 15,
+    marginTop: 5,
+    marginBottom: 5,
     marginLeft: 5,
     marginRight: 5
   },
