@@ -29,13 +29,14 @@ class MyNewsScreen extends React.Component {
     title: 'MyNews',
   };
 
-  componentDidMount() {
-    if (!this.props.session) {
-      return;
-    }
+  // Only called once, not each time navigated to, so moved the fetch out to other places.
+  // componentDidMount() {
+  //   if (!this.props.session) {
+  //     return;
+  //   }
 
-    fetchMyNews(this.props.dispatch, this.props.session.userId, this.props.session.token);
-  }
+  //   fetchMyNews(this.props.dispatch, this.props.session.userId, this.props.session.token);
+  // }
 
   onStoryPress = (story) => {
     WebBrowser.openBrowserAsync(story.link);

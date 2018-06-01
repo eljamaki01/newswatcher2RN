@@ -68,3 +68,6 @@ build
 
 # Expo
 .expo/**/*
+
+# Keystore file
+NewsWatcher.jks

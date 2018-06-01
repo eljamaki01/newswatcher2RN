@@ -34,13 +34,14 @@ class ProfileScreen extends React.Component {
     title: 'NewsFilters',
   };
 
-  componentDidMount() {
-    if (!this.props.session) {
-      return;
-    }
+  // Only called once, not each time navigated to, so moved the fetch out to other places.
+  // componentDidMount() {
+  //   if (!this.props.session) {
+  //     return;
+  //   }
 
-    fetchMyProfile(this.props.dispatch, this.props.session.userId, this.props.session.token);
-  }
+  //   fetchMyProfile(this.props.dispatch, this.props.session.userId, this.props.session.token);
+  // }
 
   handleAdd = () => {
     const { dispatch } = this.props
@@ -78,6 +79,7 @@ class ProfileScreen extends React.Component {
         }
         dispatch({ type: 'MSG_DISPLAY', msg: "Profile saved" });
         Alert.alert("Profile save");
+        // SInce filter changed, force a refresh of news stories.
         setTimeout(() => {
           fetchMyNews(this.props.dispatch, this.props.session.userId, this.props.session.token);
         }, 2000);

@@ -7,6 +7,8 @@ import MainTabNavigator from './navigation/MainTabNavigator';
 import { createStore } from 'redux'
 import { Provider } from 'react-redux'
 import reducer from './reducers'
+import { fetchMyNews } from './utils/utils';
+import { fetchMyProfile } from './utils/utils';
 
 const store = createStore(reducer);
 
@@ -14,20 +16,20 @@ const RootNavigator = TabNavigator(
   {
     Main: {
       screen: MainTabNavigator,
-    },
+    }
   },
   {
     navigationOptions: () => ({
       headerTitleStyle: {
         fontWeight: 'normal',
-      },
-    }),
+      }
+    })
   }
 );
 
 export default class App extends React.Component {
   state = {
-    isLoadingComplete: false,
+    isLoadingComplete: false
   };
 
   componentDidMount() {
@@ -36,9 +38,12 @@ export default class App extends React.Component {
       if (value) {
         const tokenObject = JSON.parse(value);
         store.dispatch({ type: 'RECEIVE_TOKEN_SUCCESS', msg: `Signed in as ${tokenObject.displayName}`, session: tokenObject });
+        // There could be a timing issue on startup so can't count on ComponentDidMount to fetch the data and have the
+        // session token available at that time.
+        fetchMyNews(store.dispatch, tokenObject.userId, tokenObject.token);
+        fetchMyProfile(store.dispatch, tokenObject.userId, tokenObject.token);
       } else {
       }
-  
     })
   }
 

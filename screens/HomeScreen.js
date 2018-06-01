@@ -16,7 +16,10 @@ import { toHours } from '../utils/utils';
 export default class HomeScreen extends React.Component {
   constructor(props) {
     super(props);
-    this.state = { isLoading: true, news: null };
+    this.state = {
+      isLoading: true,
+      news: null
+    };
   }
 
   static navigationOptions = {
