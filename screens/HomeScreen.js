@@ -23,7 +23,7 @@ export default class HomeScreen extends React.Component {
   }
 
   static navigationOptions = {
-    title: 'HomeNews',
+    header: null
   };
 
   componentDidMount() {

@@ -31,17 +31,17 @@ class ProfileScreen extends React.Component {
   }
 
   static navigationOptions = {
-    title: 'NewsFilters',
+    header: null
   };
 
-  // Only called once, not each time navigated to, so moved the fetch out to other places.
-  // componentDidMount() {
-  //   if (!this.props.session) {
-  //     return;
-  //   }
+  // Screes are lazy initialized. This will run when navigated at that time and one time only.
+  componentDidMount() {
+    if (!this.props.session) {
+      return;
+    }
 
-  //   fetchMyProfile(this.props.dispatch, this.props.session.userId, this.props.session.token);
-  // }
+    fetchMyProfile(this.props.dispatch, this.props.session.userId, this.props.session.token);
+  }
 
   handleAdd = () => {
     const { dispatch } = this.props

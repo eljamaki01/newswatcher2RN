@@ -31,7 +31,7 @@ export class LoginScreen extends React.Component {
   }
 
   static navigationOptions = {
-    title: 'Account',
+    header: null
   };
 
   handleLogin = () => {

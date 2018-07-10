@@ -26,17 +26,17 @@ class MyNewsScreen extends React.Component {
   }
 
   static navigationOptions = {
-    title: 'MyNews',
+    header: null
   };
 
-  // Only called once, not each time navigated to, so moved the fetch out to other places.
-  // componentDidMount() {
-  //   if (!this.props.session) {
-  //     return;
-  //   }
+  // Screes are lazy initialized. This will run when navigated at that time and one time only.
+  componentDidMount() {
+    if (!this.props.session) {
+      return;
+    }
 
-  //   fetchMyNews(this.props.dispatch, this.props.session.userId, this.props.session.token);
-  // }
+    fetchMyNews(this.props.dispatch, this.props.session.userId, this.props.session.token);
+  }
 
   onStoryPress = (story) => {
     WebBrowser.openBrowserAsync(story.link);
