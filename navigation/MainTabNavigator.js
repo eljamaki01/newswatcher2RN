@@ -10,7 +10,7 @@ import ProfileScreen from '../screens/ProfileScreen';
 import LoginScreen from '../screens/LoginScreen';
 
 const HomeStack = createStackNavigator({
-  Home: HomeScreen
+  screen: HomeScreen
 });
 
 HomeStack.navigationOptions = {
@@ -24,7 +24,7 @@ HomeStack.navigationOptions = {
 };
 
 const MyNewsStack = createStackNavigator({
-  MyNews: MyNewsScreen
+  screen: MyNewsScreen
 });
 
 MyNewsStack.navigationOptions = {
@@ -38,7 +38,7 @@ MyNewsStack.navigationOptions = {
 };
 
 const ProfileStack = createStackNavigator({
-  Profile: ProfileScreen
+  screen: ProfileScreen
 });
 
 ProfileStack.navigationOptions = {
@@ -52,7 +52,7 @@ ProfileStack.navigationOptions = {
 };
 
 const LoginStack = createStackNavigator({
-  Login: LoginScreen
+  screen: LoginScreen
 });
 
 LoginStack.navigationOptions = {
